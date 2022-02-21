@@ -4,6 +4,7 @@ const router = express.Router();
 const { body, validationResult } = require("express-validator");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const fetchuser = require("../middleware/fetchuser");
 
 const JWT_SECRET = "AMBUJVERMA@#01";
 
@@ -88,4 +89,19 @@ router.post(
   }
 );
 
+
+// Route 3: Get loggedin user details using: POst "/api/auth/getuser". no login require
+router.post(
+  "/getuser",fetchuser, async (req, res) => {
+
+try {
+  const userId =req.user.id;
+  const user = await User.findById(userId).select("-password")
+  res.send(user)
+  
+} catch (error) {
+  console.error(error.message);
+  res.status(500).send("some error occured");
+}
+});
 module.exports = router;
