@@ -19,11 +19,12 @@ router.post(
     }),
   ],
   async (req, res) => {
-    // Id there are errors, return Bad request and the errors
+    // If there are errors, return Bad request and the errors
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
     }
+    
     // chech wheather the user with this email exists already
     try {
       if (await User.findOne({ email: req.body.email })) {
