@@ -8,7 +8,7 @@ const fetchuser = require("../middleware/fetchuser");
 
 const JWT_SECRET = "AMBUJVERMA@#01";
 
-//Route 2: create a user using: POst "/api/auth/createuser". no login require
+//Route 1: create a user using: POST "/api/auth/createuser". no login require
 router.post(
   "/createuser",
   [
@@ -19,10 +19,11 @@ router.post(
     }),
   ],
   async (req, res) => {
+    let success = false;
     // If there are errors, return Bad request and the errors
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
+      return res.status(400).json({success, errors: errors.array() });
     }
     
     // chech wheather the user with this email exists already
@@ -31,7 +32,7 @@ router.post(
         // this is a promise we should wait for resolve
         return res
           .status(400)
-          .json({ error: "sorry a user with this email already exists" });
+          .json({success, error: "sorry a user with this email already exists" });
       }
 
       const salt = bcrypt.genSaltSync(10);
@@ -47,7 +48,9 @@ router.post(
         user: { id: user.id },
       };
       const authToken = jwt.sign(data, JWT_SECRET);
-      res.json({ authToken });
+      // res.json(user)
+      success = true;
+      res.json({success, authToken });
     } catch (error) {
       console.error(error.message);
       res.status(500).send("some error occured");
@@ -63,6 +66,7 @@ router.post(
     body("password", "Enter password").exists(),
   ],
   async (req, res) => {
+    let success = false;
     // Id there are errors, return Bad request and the errors
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -72,17 +76,20 @@ router.post(
     try {
       let user = await User.findOne({ email });
       if (!user) {
+        success=flase;
         return res.status(400).json({ error: "Invalid credentials" });
       }
       const passwordCompare = await bcrypt.compare(password, user.password);
       if (!passwordCompare) {
-        return res.status(400).json({ error: "Invalid credentials" });
+        success= false;
+        return res.status(400).json({ success, error: "Invalid credentials" });
       }
       const payload = {
         user: { id: user.id },
       };
       const authtoken = jwt.sign(payload, JWT_SECRET);
-      res.json({ authtoken });
+      success =  true;
+      res.json({ success, authtoken });
     } catch (error) {
       console.error(error.message);
       res.status(500).send("some error occured");

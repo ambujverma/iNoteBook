@@ -1,9 +1,8 @@
-import React from 'react'
-
+import React, { useContext, useEffect } from 'react'
 const About = () => {
   return (
     <div>
-        <h3>this is about</h3>
+        this is about page 
     </div>
   )
 }
